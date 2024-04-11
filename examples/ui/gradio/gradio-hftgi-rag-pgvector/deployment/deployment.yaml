@@ -52,11 +52,11 @@ spec:
             - name: APP_TITLE
               value: 'Talk with your documentation'
             - name: INFERENCE_SERVER_URL
-              value: 'https://your_inference_endpoint'
+              value: 'https://ollama-models-irs-rag-demo.apps.cluster-n4hd4.dynamic.redhatworkshops.io'
             - name: DB_CONNECTION_STRING
-              value: 'postgresql+psycopg://user:password@postgresql-server:5432/vectordb'
+              value: 'postgresql+psycopg://vectordb:vectordb@postgresql.pgvector.svc.cluster.local:5432/vectordb'
             - name: DB_COLLECTION_NAME
-              value: 'documents_test'
+              value: 'rhoai-doc-2.6'
             - name: MAX_NEW_TOKENS
               value: '512'
             - name: TOP_K
@@ -92,7 +92,7 @@ spec:
             successThreshold: 1
             failureThreshold: 24
           terminationMessagePolicy: File
-          image: 'quay.io/rh-aiservices-bu/gradio-hftgi-rag-pgvector:latest'
+          image: 'quay.io/jhurlocker/gradio-ollama-pgvector:latest'
       dnsPolicy: ClusterFirst
   strategy:
     type: RollingUpdate

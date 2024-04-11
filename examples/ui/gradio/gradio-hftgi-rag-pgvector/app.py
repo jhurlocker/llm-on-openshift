@@ -12,13 +12,14 @@ from langchain.callbacks.base import BaseCallbackHandler
 from langchain.chains import RetrievalQA
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 from langchain.llms import HuggingFaceTextGenInference
+from langchain.llms import Ollama
 from langchain.prompts import PromptTemplate
 from langchain.vectorstores.pgvector import PGVector
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
 load_dotenv()
 
-# Parameters
-
+# The Parameters
 APP_TITLE = os.getenv('APP_TITLE', 'Talk with your documentation')
 
 INFERENCE_SERVER_URL = os.getenv('INFERENCE_SERVER_URL')
@@ -98,17 +99,28 @@ store = PGVector(
     collection_name=DB_COLLECTION_NAME,
     embedding_function=embeddings)
 
+# COMMENTING THIS. USING OLLAMA INSTEAD.
 # LLM
-llm = HuggingFaceTextGenInference(
-    inference_server_url=INFERENCE_SERVER_URL,
-    max_new_tokens=MAX_NEW_TOKENS,
-    top_k=TOP_K,
-    top_p=TOP_P,
-    typical_p=TYPICAL_P,
-    temperature=TEMPERATURE,
-    repetition_penalty=REPETITION_PENALTY,
-    streaming=True,
-    verbose=False,
+# llm = HuggingFaceTextGenInference(
+#     inference_server_url=INFERENCE_SERVER_URL,
+#     max_new_tokens=MAX_NEW_TOKENS,
+#     top_k=TOP_K,
+#     top_p=TOP_P,
+#     typical_p=TYPICAL_P,
+#     temperature=TEMPERATURE,
+#     repetition_penalty=REPETITION_PENALTY,
+#     streaming=True,
+#     verbose=False,
+#     callbacks=[QueueCallback(q)]
+# )
+
+llm = Ollama(
+    base_url=INFERENCE_SERVER_URL,
+    model="mistral",
+    top_p=0.92,
+    temperature=0.01,
+    num_predict=512,
+    repeat_penalty=1.03,
     callbacks=[QueueCallback(q)]
 )
 
@@ -142,6 +154,11 @@ def ask_llm(message, history):
     for next_token, content in stream(message):
         yield(content)
 
+# def ask_llm(question):
+#     #result = chain.run(question)
+#     result = qa_chain({"query": question})
+#     return result
+
 with gr.Blocks(title="RHOAI HatBot", css="footer {visibility: hidden}") as demo:
     chatbot = gr.Chatbot(
         show_label=False,
@@ -162,5 +179,5 @@ if __name__ == "__main__":
     demo.queue().launch(
         server_name='0.0.0.0',
         share=False,
-        favicon_path='./assets/robot-head.ico'
+        favicon_path='./assets/rh.ico'
         )
